@@ -1,69 +1,84 @@
 import { DEFAULT_DELIMITER, ESCAPE_CHARACTER } from "../common/Printable";
 import { Name } from "./Name";
-import { AbstractName } from "./AbstractName";
+import { AbstractName, ExceptionType } from "./AbstractName";
+import { IllegalArgumentException } from "../common/IllegalArgumentException";
+import { InvalidStateException } from "../common/InvalidStateException";
 
 export class StringArrayName extends AbstractName {
 
     protected components: string[] = [];
 
     constructor(source: string[], delimiter?: string) {
-        super();
-        throw new Error("needs implementation or deletion");
+        if (delimiter !== undefined) {
+            super(delimiter);
+        } else {
+            super();
+        }
+        this.components = source;
+        this.assertClassInvariants();
     }
 
     public clone(): Name {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public asString(delimiter: string = this.delimiter): string {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public asDataString(): string {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public isEqual(other: Name): boolean {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public getHashCode(): number {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public isEmpty(): boolean {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public getDelimiterCharacter(): string {
-        throw new Error("needs implementation or deletion");
+        this.assertClassInvariants();
+        return new StringArrayName(this.components.slice(), this.getDelimiterCharacter());
     }
 
     public getNoComponents(): number {
-        throw new Error("needs implementation or deletion");
+        this.assertClassInvariants();
+        return this.components.length;
     }
 
     public getComponent(i: number): string {
-        throw new Error("needs implementation or deletion");
+        this.assertHasComponentNo(i);
+        this.assertClassInvariants();
+        return this.components[i];
     }
 
     public setComponent(i: number, c: string) {
-        throw new Error("needs implementation or deletion");
+        this.assertHasComponentNo(i);
+        this.assertIsValidComponent(c)
+        this.components[i] = c;
+        this.assertClassInvariants();
     }
 
     public insert(i: number, c: string) {
-        throw new Error("needs implementation or deletion");
+        this.assertIsValidComponent(c)
+        this.components.splice(i, 0, c);
+        this.assertClassInvariants();
     }
 
     public append(c: string) {
-        throw new Error("needs implementation or deletion");
+        this.assertIsValidComponent(c)
+        this.components.push(c);
+        this.assertClassInvariants();
     }
 
     public remove(i: number) {
-        throw new Error("needs implementation or deletion");
+        this.assertHasComponentNo(i);
+        this.components.splice(i, 1);
+        this.assertClassInvariants();
     }
 
-    public concat(other: Name): void {
-        throw new Error("needs implementation or deletion");
+    private assertHasComponentNo(i: number) {
+        IllegalArgumentException.assert(this.components.length > i, "index out of range");
+        IllegalArgumentException.assert(i >= 0, "index out of range");
+    }
+
+    private assertIsValidComponent(c: string, et: ExceptionType = ExceptionType.IllegalArgument) {
+        this.assertIsNotNullOrUndefined(c);
+        /* matches unescaped delimiter characters */
+        const delimiter_regex = new RegExp("(?<!\\\\(?:\\\\{2})*)" + StringArrayName.escapeRegexChars(this.delimiter), "g");
+        /* matches single (unescaped and not immediately before a delimiter character) escape character ('\\'); */
+        const escape_character_regex = new RegExp("(?<=(?:^|[^\\\\])(?:\\\\{2})*)\\\\(?!(?:" + StringArrayName.escapeRegexChars(this.delimiter) + ")|(?:\\\\))", "g");
+        if (c.match(delimiter_regex) !== null || c.match(escape_character_regex) !== null) {
+            this.dispatchException("expected a correctly masked component, but received: \"" + c + "\"", et);
+        }
+    }
+
+    private assertClassInvariants() {
+        for (let i = 0; i < this.components.length; ++i) {
+            this.assertIsValidComponent(this.components[i], ExceptionType.IllegalArgument);
+        }
+        this.assertIsValidDelimiterCharacter(this.delimiter, ExceptionType.IllegalArgument);
     }
 }

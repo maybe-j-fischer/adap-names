@@ -38,7 +38,7 @@ export interface Name extends Cloneable, Printable, Equality {
     append(c: string): void;
 
     remove(i: number): void;
-    
+
     concat(other: Name): void;
-    
+
 }
