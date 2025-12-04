@@ -4,7 +4,6 @@ import { Name } from "../../../src/adap-b04/names/Name";
 import { StringName } from "../../../src/adap-b04/names/StringName";
 import { StringArrayName } from "../../../src/adap-b04/names/StringArrayName";
 import { IllegalArgumentException } from "../../../src/adap-b04/common/IllegalArgumentException";
-import { InvalidStateException } from "../../../src/adap-b04/common/IllegalArgumentException";
 
 describe("Basic StringName function tests", () => {
   it("test insert", () => {
@@ -85,7 +84,9 @@ describe("Invalid argument tests", () => {
     expect(() => san.setComponent(2, "a.b")).toThrowError(expect.any(IllegalArgumentException));
     expect(() => san.insert(1, "a.b")).toThrowError(expect.any(IllegalArgumentException));
 
-    expect(() => sn.concat()).toThrowError(expect.any(IllegalArgumentException));
-    expect(() => san.concat()).toThrowError(expect.any(IllegalArgumentException));
+    let snr: Name = new StringArrayName(arr, '#');
+
+    expect(() => sn.concat(snr)).toThrowError(expect.any(IllegalArgumentException));
+    expect(() => san.concat(snr)).toThrowError(expect.any(IllegalArgumentException));
   });
 });
