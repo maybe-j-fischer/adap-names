@@ -131,7 +131,7 @@ export abstract class AbstractName implements Name {
 
     protected assertIsNotNullOrUndefined(o: object | string, et: ExceptionType = ExceptionType.IllegalArgument) {
         if (o === undefined || o === null) {
-            throw new IllegalArgumentException("passed undefined or null as argument");
+            this.dispatchException("passed undefined or null as argument", et);
         }
     }
 
